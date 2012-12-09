@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from contextlib import closing
 
 app = Flask(__name__)
@@ -11,10 +11,13 @@ def init_db():
 
 @app.route('/')
 def index():
-    return 'Hello World!'
+    return 'Status goes here'
 
-@app.route('/status')
-def machine_status():
+@app.route('/j/')
+def index_json():
+    return jsonify(machines=[])
+
+def get_index_data():
     pass
 
 @app.route('/grab/<int:id>', methods=['GET', 'POST'])
