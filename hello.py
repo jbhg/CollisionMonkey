@@ -1,5 +1,13 @@
 from flask import Flask
+from contextlib import closing
+
 app = Flask(__name__)
+
+def init_db():
+    with closing(connect_db()) as db:
+        with app.open_resource('schema.sql') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
 
 @app.route('/')
 def index():
