@@ -1,13 +1,27 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, g
 from contextlib import closing
+import sqlite3
 
 app = Flask(__name__)
+DATABASE = 'db/sqlite_db.txt'
 
 def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+def connect_db():
+    return sqlite3.connect(DATABASE)
+
+@app.before_request
+def before_request():
+    g.db = connect_db()
+
+@app.teardown_request
+def teardown_request(exception):
+    if hasattr(g, 'db'):
+        g.db.close()
 
 @app.route('/')
 def index():
@@ -67,7 +81,7 @@ class Branch:
 class Machine:
     """Defines a merge machine"""
     def __init__(self, name):
-        self.name = 'hostname'
+        self.name = name
         self.id = None
         self.last_event = None
 
