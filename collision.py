@@ -24,6 +24,7 @@ def teardown_request(exception):
         g.db.close()
 
 @app.route('/')
+@app.route('/machines')
 def index():
     state = fetch_index_data()
     return 'Status goes here'
@@ -57,6 +58,32 @@ def write_step(event_name, hostname, branch_name, username):
     else:
         return jsonify(status='FAIL')
 
+@app.route('/users/')
+def show_users():
+    return ""
+
+@app.route('/user/<username>')
+def show_single_user(username):
+    user = verify_user(username, shouldCreate=False)
+
+    if user:
+        return jsonify(status="OK")
+    else:
+        return jsonify(status="BAD")
+
+@app.route('/branches/')
+def show_branches():
+    return ""
+
+@app.route('/branch/<branchname>')
+def show_single_branch(branchname):
+    branch = verify_branch(branchname)
+
+    if branch:
+        return jsonify(status="OK")
+    else:
+        return jsonify(status="BAD")
+
 def verify_event(event_name):
     return True
 
@@ -66,7 +93,7 @@ def verify_hostname(hostname):
 def verify_branch(branch_name):
     return True
 
-def verify_user(username):
+def verify_user(username, shouldCreate=True):
     return True
 
 ## Class stubs
