@@ -17,7 +17,7 @@ def index():
 @app.route('/j/')
 def index_json():
     state = get_index_data()
-    return jsonify(machines=state.machines)
+    return jsonify(machines=str(state))
 
 def get_index_data():
     """Builds and returns the current State"""
@@ -59,12 +59,22 @@ class Branch:
         self.owner = 'ldap'
         self.events = []
 
+    def __str__(self):
+        return '{{ branchname={self.branchname}, owner={self.owner}, events={self.events} }}'.format(self=self)
+    def __repr__(self):
+        return self.__str__()
+
 class Machine:
     """Defines a merge machine"""
     def __init__(self, name):
         self.name = 'hostname'
         self.id = None
         self.last_event = None
+
+    def __str__(self):
+        return '{{ name={self.name}, id={self.id}, last_event={self.last_event} }}'.format(self=self)
+    def __repr__(self):
+        return self.__str__()
 
 class State():
     """Current state of the merge machines"""
@@ -73,11 +83,15 @@ class State():
 
     def fetch_machines(self):
         return [
-            "merge",
-            "merge2",
-            "merge3"
+            Machine("merge"),
+            Machine("merge2"),
+            Machine("merge3")
             ]
 
+    def __str__(self):
+        return str(self.machines)
+    def __repr__(self):
+        return self.__str__()
 
 if __name__ == '__main__':
     app.run(debug=True)
