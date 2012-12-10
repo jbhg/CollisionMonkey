@@ -1,50 +1,48 @@
 -- First-Class
 -- Represents a user with email address [username]@tripadvisor.com
-drop table if exists user;
-create table user (
+drop table if exists t_user;
+create table t_user (
   id integer primary key autoincrement,
   username string not null
 );
 
 -- First-Class
 -- Represents a merge machine as [hostname]@tripadvisor.com
-drop table if exists machine;
-create table machine (
+drop table if exists t_machine;
+create table t_machine (
   id integer primary key autoincrement,
   hostname string not null
 );
 
 -- First-Class
 -- Represents an individual step in the merge process.
-drop table if exists step;
-create table step (
+drop table if exists t_step;
+create table t_step (
   id integer primary key autoincrement,
   name string not null
 );
 
--- Represents an the completion of a step on a machine.
-drop table if exists event;
-create table event (
+-- First-Class
+-- Branch name and committer.
+drop table if exists t_branch;
+create table t_branch (
   id integer primary key autoincrement,
-  machine integer,
-  step integer,
-  clocktime integer,
-  FOREIGN KEY(machine) REFERENCES machine(id),
-  FOREIGN KEY(step) REFERENCES step(id)
+  name integer not null,
+  user integer not null,
+  FOREIGN KEY(user) REFERENCES t_user(id)
 );
 
--- Branch name, committer, and time of grab and ungrab.
--- step_grab may not be null; step_ungrab will be null until the machine is ungrabbed.
-drop table if exists branch;
-create table branch (
+-- Represents an the completion of a step on a machine.
+drop table if exists t_event;
+create table t_event (
   id integer primary key autoincrement,
-  name integer,
-  user integer,
-  step_grab integer,
-  step_ungrab integer,
-  FOREIGN KEY(user) REFERENCES user(id),
-  FOREIGN KEY(step_grab) REFERENCES step(id),
-  FOREIGN KEY(step_ungrab) REFERENCES step(id)
+  branch integer not null,
+  machine integer not null,
+  step integer not null,
+  clocktime integer not null,
+  FOREIGN KEY(branch) REFERENCES t_branch(id)
+  FOREIGN KEY(machine) REFERENCES t_machine(id),
+  FOREIGN KEY(step) REFERENCES t_step(id)
 );
 
 -- Cached duration of the particular event.
@@ -54,19 +52,19 @@ create table branch (
 drop table if exists o_stepduration;
 create table o_stepduration (
   id integer primary key autoincrement,
-  event integer,
-  time integer,
-  FOREIGN KEY(event) REFERENCES event(id)  
+  event integer not null,
+  time integer not null,
+  FOREIGN KEY(event) REFERENCES t_event(id)  
 );
 
 -- Current status of the merge machines
 -- 'v' prefix indicates 'view'; this table summarizes data found elsewhere.
 drop table if exists v_status;
 create table v_status (
-  machine integer,
-  event integer,
-  branch integer,
-  FOREIGN KEY(machine) REFERENCES machine(id),
-  FOREIGN KEY(event) REFERENCES event(id),
-  FOREIGN KEY(branch) REFERENCES branch(id)
+  machine integer not null,
+  event integer not null,
+  branch integer not null,
+  FOREIGN KEY(machine) REFERENCES t_machine(id),
+  FOREIGN KEY(event) REFERENCES t_event(id),
+  FOREIGN KEY(branch) REFERENCES t_branch(id)
 );
