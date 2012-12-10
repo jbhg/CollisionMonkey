@@ -11,22 +11,73 @@ def init_db():
 
 @app.route('/')
 def index():
+    state = get_index_data()
     return 'Status goes here'
 
 @app.route('/j/')
 def index_json():
-    return jsonify(machines=[])
+    state = get_index_data()
+    return jsonify(machines=state.machines)
 
 def get_index_data():
-    pass
+    """Builds and returns the current State"""
+    return State()
 
-@app.route('/grab/<int:id>', methods=['GET', 'POST'])
-def grab_machine(id):
-    pass
+@app.route('/did/<step_name>/on/<hostname>/in/<branch>',
+           methods=['POST', 'GET'])
+def write_step(step_name, hostname, branch):
+    """Writes a named step on a machine"""
+    if verify_hostname(hostname) and verify_step(step_name):
+        return jsonify(status='OK',
+                       hostname=hostname,
+                       step=step_name,
+                       branch=branch,
+                       id='step_id')
 
-@app.route('/ungrab/<int:id>', methods=['GET', 'POST'])
-def ungrab_machine(id):
-    pass
+def verify_step(step_name):
+    return True
+
+def verify_hostname(hostname):
+    return True
+
+def verify_branch(hostname):
+    return True
+
+## Class stubs
+
+class Event:
+    """An event is anything that happens on a machine, e.g. grab or SUCCESS_*"""
+    def __init__(self):
+        self.id = 1
+        self.timestamp = 1
+        self.name = None
+
+class Branch:
+    """Grouping class for an entire merge"""
+    def __init__(self):
+        self.branchname = 'svn name'
+        self.owner = 'ldap'
+        self.events = []
+
+class Machine:
+    """Defines a merge machine"""
+    def __init__(self, name):
+        self.name = 'hostname'
+        self.id = None
+        self.last_event = None
+
+class State():
+    """Current state of the merge machines"""
+    def __init__(self):
+        self.machines = self.fetch_machines()
+
+    def fetch_machines(self):
+        return [
+            "merge",
+            "merge2",
+            "merge3"
+            ]
+
 
 if __name__ == '__main__':
     app.run(debug=True)
