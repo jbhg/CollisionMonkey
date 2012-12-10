@@ -7,7 +7,7 @@ DATABASE = 'db/sqlite_db.txt'
 
 def init_db():
     with closing(connect_db()) as db:
-        with app.open_resource('schema.sql') as f:
+        with app.open_resource('db/schema.sql') as f:
             db.cursor().executescript(f.read())
         db.commit()
 
@@ -25,36 +25,48 @@ def teardown_request(exception):
 
 @app.route('/')
 def index():
-    state = get_index_data()
+    state = fetch_index_data()
     return 'Status goes here'
 
 @app.route('/j/')
 def index_json():
-    state = get_index_data()
+    state = fetch_index_data()
     return jsonify(machines=str(state))
 
-def get_index_data():
+def fetch_index_data():
     """Builds and returns the current State"""
     return State()
 
-@app.route('/did/<step_name>/on/<hostname>/in/<branch>',
+@app.route('/did/<event_name>/on/<hostname>/in/<branch_name>/for/<username>',
            methods=['POST', 'GET'])
-def write_step(step_name, hostname, branch):
+def write_step(event_name, hostname, branch_name, username):
     """Writes a named step on a machine"""
-    if verify_hostname(hostname) and verify_step(step_name):
-        return jsonify(status='OK',
-                       hostname=hostname,
-                       step=step_name,
-                       branch=branch,
-                       id='step_id')
+    host = verify_hostname(hostname)
+    user = verify_user(username)
+    branch = verify_branch(branch_name)
 
-def verify_step(step_name):
+    event = verify_event(event_name)
+
+    if hostname and event and branch and user:
+        return jsonify(status='OK',
+                       host=host,
+                       event=event,
+                       branch=branch,
+                       user=user,
+                       id='step_id')
+    else:
+        return jsonify(status='FAIL')
+
+def verify_event(event_name):
     return True
 
 def verify_hostname(hostname):
     return True
 
-def verify_branch(hostname):
+def verify_branch(branch_name):
+    return True
+
+def verify_user(username):
     return True
 
 ## Class stubs
